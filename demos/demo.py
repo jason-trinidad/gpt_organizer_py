@@ -13,7 +13,23 @@ from langchain.prompts import (
 )
 import azure.cognitiveservices.speech as speechsdk
 
-import gpt_organizer.prompts as prompts
+# import gpt_organizer.prompts as prompts
+
+DEMO_PROMPT = """Context: You are a helpful assistant. Your job is to interview your manager and obtain enough information to understand their idea.
+
+Instructions:
+1. Respond as concisely as possible
+2. Respond only in questions"""
+
+DEMO_INSTRUCTIONS = """Instructions: based on the chat history provided, write a three paragraph report that answers the following questions.
+
+Questions:
+
+1. What was the human doing when they had this insight?
+2. Was there any relevant context for the idea, like something a colleague of theirs said or an unusual occurence?
+3. Was the human speaking with anyone when the scenario occurred? If so, who were they speaking with, and what is their position?
+4. How would you describe their main insight in one sentence?
+5. Summarize the the human's thoughts in bullet points"""
 
 
 def compose_message_history():
@@ -128,7 +144,8 @@ def generate_response():
 def main():
     # Initialize state
     if "prompt" not in st.session_state:
-        st.session_state["prompt"] = prompts.DEMO_PROMPT
+        # st.session_state["prompt"] = prompts.DEMO_PROMPT
+        st.session_state["prompt"] = DEMO_PROMPT
 
     if "history" not in st.session_state:
         st.session_state["history"] = []
@@ -143,7 +160,8 @@ def main():
         st.session_state["speech_recognizer"] = get_speech_recognizer()
 
     if "form_prompt" not in st.session_state:
-        st.session_state["form_prompt"] = prompts.DEMO_INSTRUCTIONS
+        # st.session_state["form_prompt"] = prompts.DEMO_INSTRUCTIONS
+        st.session_state["form_prompt"] = DEMO_INSTRUCTIONS
 
     st.title("Demo")
 
