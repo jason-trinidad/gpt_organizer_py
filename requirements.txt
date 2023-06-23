@@ -56,7 +56,7 @@ jinja2==3.1.2
     #   pydeck
 jsonschema==4.17.3
     # via altair
-langchain==0.0.205
+langchain==0.0.209
     # via -r requirements.in
 langchainplus-sdk==0.0.13
     # via langchain

@@ -2,9 +2,10 @@ DEMO_PROMPT = """Context: You are a helpful assistant. Your job is to interview 
 
 Instructions:
 1. Respond as concisely as possible
-2. Respond only in questions"""
+2. Respond only in questions
+3. When the user prompts you, generate a report"""
 
-DEMO_INSTRUCTIONS = """Instructions: based on the chat history provided, write a three paragraph report that answers the following questions.
+FORM_INSTRUCTIONS = """Instructions: based on the chat history provided, write a three paragraph report that answers the following questions.
 
 Questions:
 

@@ -1,77 +1,24 @@
-import os
-from typing import List
-
 import streamlit as st
 from streamlit_chat import message
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
-from langchain.schema import SystemMessage
-from langchain.prompts import (
-    PromptTemplate,
-    SystemMessagePromptTemplate,
-    ChatPromptTemplate,
-)
 
 # import azure.cognitiveservices.speech as speechsdk
 
-# import gpt_organizer.prompts as prompts
-
-DEMO_PROMPT = """Context: You are a helpful assistant. Your job is to interview your manager and obtain enough information to understand their idea.
-
-Instructions:
-1. Respond as concisely as possible
-2. Respond only in questions"""
-
-DEMO_INSTRUCTIONS = """Instructions: based on the chat history provided, write a three paragraph report that answers the following questions.
-
-Questions:
-
-1. What was the human doing when they had this insight?
-2. Was there any relevant context for the idea, like something a colleague of theirs said or an unusual occurence?
-3. Was the human speaking with anyone when the scenario occurred? If so, who were they speaking with, and what is their position?
-4. How would you describe their main insight in one sentence?
-5. Summarize the the human's thoughts in bullet points"""
-
-
-def compose_message_history():
-    message_history_str = ""
-    for i, message in enumerate(st.session_state["history"]):
-        if i % 2 == 0:
-            message_history_str += f"\nHuman: {message}"
-        else:
-            message_history_str += f"\nAI: {message}"
-    return message_history_str
+import gpt_organizer.prompts as prompts
+from gpt_organizer.OrganizerAgent import OrganizerAgent
+from gpt_organizer.utils import *
 
 
 def on_message_change():
-    # Handle message
-    user_input = st.session_state["message"]
+    # Handle user message
+    st.session_state["history"].append(st.session_state["message"])
     st.session_state["message"] = ""
-    st.session_state["history"].append(user_input)
 
-    # Create message history
-    message_history_str = compose_message_history()
-    template = (
-        st.session_state["prompt"] + "\nChat History: {message_history}" + "\nAI: "
+    # Get response
+    response = st.session_state["agent"].get_response(
+        st.session_state["history"],
+        st.session_state["prompt"],
+        st.session_state["form_prompt"],
     )
-
-    # Compose prompt
-    prompt = PromptTemplate(
-        template=template,
-        input_variables=["message_history"],
-    )
-    sys_prompt = SystemMessagePromptTemplate(prompt=prompt)
-    chat_prompt = ChatPromptTemplate.from_messages([sys_prompt])
-
-    # Get LLM response
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    llm = ChatOpenAI(
-        model="gpt-3.5-turbo-0613",
-        temperature=0,
-        openai_api_key=openai_api_key,
-    )
-    chain = LLMChain(llm=llm, prompt=chat_prompt, verbose=True)
-    response = chain(inputs={"message_history": message_history_str})["text"]
     st.session_state["history"].append(response)
 
 
@@ -117,36 +64,10 @@ def on_message_change():
 #     st.session_state["speech_recognizer"].start_continuous_recognition()
 
 
-def generate_response():
-    # Create message history
-    message_history_str = compose_message_history()
-    template = st.session_state["form_prompt"] + "\nChat History: {message_history}"
-
-    # Compose prompt
-    prompt = PromptTemplate(
-        template=template,
-        input_variables=["message_history"],
-    )
-    sys_prompt = SystemMessagePromptTemplate(prompt=prompt)
-    chat_prompt = ChatPromptTemplate.from_messages([sys_prompt])
-
-    # Get LLM response
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    llm = ChatOpenAI(
-        model="gpt-3.5-turbo-0613",
-        temperature=0,
-        openai_api_key=openai_api_key,
-    )
-    chain = LLMChain(llm=llm, prompt=chat_prompt, verbose=True)
-    response = chain(inputs={"message_history": message_history_str})["text"]
-    return response
-
-
 def main():
     # Initialize state
     if "prompt" not in st.session_state:
-        # st.session_state["prompt"] = prompts.DEMO_PROMPT
-        st.session_state["prompt"] = DEMO_PROMPT
+        st.session_state["prompt"] = prompts.DEMO_PROMPT
 
     if "history" not in st.session_state:
         st.session_state["history"] = []
@@ -161,8 +82,10 @@ def main():
     #     st.session_state["speech_recognizer"] = get_speech_recognizer()
 
     if "form_prompt" not in st.session_state:
-        # st.session_state["form_prompt"] = prompts.DEMO_INSTRUCTIONS
-        st.session_state["form_prompt"] = DEMO_INSTRUCTIONS
+        st.session_state["form_prompt"] = prompts.FORM_INSTRUCTIONS
+
+    if "agent" not in st.session_state:
+        st.session_state["agent"] = OrganizerAgent()
 
     st.title("Demo")
 
@@ -174,10 +97,19 @@ def main():
 
     st.markdown(st.session_state["prompt"])
 
-    text, voice = st.tabs(["Text", "Voice"])
+    st.divider()
+    new_form_prompt = st.text_area(
+        label="Form prompt:", value=st.session_state["form_prompt"]
+    )
+    if st.button("Edit form"):
+        st.session_state["form_prompt"] = new_form_prompt
+
+    st.write(st.session_state["form_prompt"])
+
+    chat, voice = st.tabs(["Chat", "Voice"])
 
     # Text UI
-    with text:
+    with chat:
         # Prompt user
         st.text_input(
             label="Response",
@@ -202,19 +134,6 @@ def main():
         #     get_user_input()
         #     # Start recording again once response has been read
         st.write("Check back soon!")
-
-    st.divider()
-    new_form_prompt = st.text_area(
-        label="Form prompt:", value=st.session_state["form_prompt"]
-    )
-    if st.button("Edit form"):
-        st.session_state["form_prompt"] = new_form_prompt
-
-    st.write(st.session_state["form_prompt"])
-
-    if st.button("Generate response"):
-        form = generate_response()
-        st.write(form)
 
 
 if __name__ == "__main__":
