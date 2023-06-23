@@ -187,4 +187,4 @@ zipp==3.15.0
     # via importlib-metadata
 
 # Import in-app modules for streamlit deploy
-[-e] github/gpt-organizer-py/gpt_organizer_py
+[-e] github/gpt_organizer_py/gpt_organizer
