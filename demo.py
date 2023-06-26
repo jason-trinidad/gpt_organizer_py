@@ -5,6 +5,7 @@ from streamlit_chat import message
 
 import gpt_organizer.prompts as prompts
 from gpt_organizer.OrganizerAgent import OrganizerAgent
+from gpt_organizer.VoiceUI import VoiceUI
 from gpt_organizer.utils import *
 
 
@@ -22,48 +23,6 @@ def on_message_change():
     st.session_state["history"].append(response)
 
 
-# def record_response(evt):
-#     # st.session_state["response"] = evt
-#     print(evt)
-
-
-# def stop_cb(evt):
-#     print("CLOSING on {}".format(evt))
-#     st.session_state["speech_recognizer"].stop_continuous_recognition()
-
-#     if evt.reason == speechsdk.ResultReason.RecognizedSpeech:
-#         print("Recognized: {}".format(evt.text))
-#     elif evt.reason == speechsdk.ResultReason.NoMatch:
-#         print("No speech could be recognized: {}".format(evt.no_match_details))
-#     elif evt.reason == speechsdk.ResultReason.Canceled:
-#         cancellation_details = evt.cancellation_details
-#         print("Speech Recognition canceled: {}".format(cancellation_details.reason))
-#         if cancellation_details.reason == speechsdk.CancellationReason.Error:
-#             print("Error details: {}".format(cancellation_details.error_details))
-#             print("Did you set the speech resource key and region values?")
-
-
-# def get_speech_recognizer():
-#     Initialize Azure speech recognizer
-#     speech_key = os.environ["AZURE_SPEECH_KEY"]
-#     azure_region = os.environ["AZURE_REGION"]
-#     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=region)
-#     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
-
-#     # Set up for automatic recognition
-#     speech_recognizer.recognized.connect(
-#         lambda evt: print("RECOGNIZED: {}".format(evt))
-#     )
-#     speech_recognizer.session_stopped.connect(stop_cb)
-#     speech_recognizer.canceled.connect(stop_cb)
-
-#     return speech_recognizer
-
-
-# def get_user_input():
-#     st.session_state["speech_recognizer"].start_continuous_recognition()
-
-
 def main():
     # Initialize state
     if "prompt" not in st.session_state:
@@ -78,8 +37,8 @@ def main():
     # if "is_recording" not in st.session_state:
     #     st.session_state["is_recording"] = False
 
-    # if "speech_recognizer" not in st.session_state:
-    #     st.session_state["speech_recognizer"] = get_speech_recognizer()
+    if "voice_ui" not in st.session_state:
+        st.session_state["voice_ui"] = VoiceUI()
 
     if "form_prompt" not in st.session_state:
         st.session_state["form_prompt"] = prompts.FORM_INSTRUCTIONS
@@ -129,11 +88,11 @@ def main():
             message(msg, is_user=is_user)
 
     with voice:
-        # if st.button("Start"):
-        #     # Initial recording start
-        #     get_user_input()
-        #     # Start recording again once response has been read
-        st.write("Check back soon!")
+        if st.button("Start"):
+            st.session_state["voice_ui"].start_recognition()
+
+        if st.button("End"):
+            st.session_state["voice_ui"].stop_recognition()
 
 
 if __name__ == "__main__":
