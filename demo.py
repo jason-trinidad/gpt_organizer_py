@@ -38,7 +38,7 @@ def main():
     #     st.session_state["is_recording"] = False
 
     if "voice_ui" not in st.session_state:
-        st.session_state["voice_ui"] = VoiceUI()
+        st.session_state["voice_ui"] = None
 
     if "form_prompt" not in st.session_state:
         st.session_state["form_prompt"] = prompts.FORM_INSTRUCTIONS
@@ -88,8 +88,11 @@ def main():
             message(msg, is_user=is_user)
 
     with voice:
+        placeholder = st.empty()
         if st.button("Start"):
-            st.session_state["voice_ui"].start_recognition()
+            st.session_state["voice_ui"] = VoiceUI(placeholder)
+            message = st.session_state["voice_ui"].get_response()
+            st.write(message)
 
         if st.button("End"):
             st.session_state["voice_ui"].stop_recognition()
