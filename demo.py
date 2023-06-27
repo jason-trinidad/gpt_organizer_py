@@ -112,10 +112,12 @@ def main():
                 message(msg, is_user=is_user)
 
     with voice:
-        if st.button("Start"):
-            st.write("To end your turn, say **'Armadillo.'**")
-            st.write("To end the conversation, say **'Penguin. Armadillo.'**")
+        st.write("To end your turn: pause, then say **'Armadillo.'**")
+        st.write(
+            "To end the conversation: pause, then say **'Penguin. [pause] Armadillo.'**"
+        )
 
+        if st.button("Start"):
             handle_conversation()
 
         if st.button("End"):
