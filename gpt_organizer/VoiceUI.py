@@ -19,8 +19,8 @@ class VoiceUI:
         speech_config = speechsdk.SpeechConfig(
             subscription=speech_key, region=azure_region
         )
-        # Test if arbitrary config solves bug
-        audio_config = speechsdk.audio.AudioOutputConfig(filename="output.wav")
+        # Test if config solves bug
+        audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
         self._recognizer = speechsdk.SpeechRecognizer(
             speech_config=speech_config, audio_config=audio_config
         )
