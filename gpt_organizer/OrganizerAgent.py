@@ -91,6 +91,7 @@ class OrganizerAgent:
     ) -> str:
         # Create message history
         message_history_str = compose_message_history(messages)
+        print(message_history_str)
         agent = cls._create_agent(message_history_str, prompt, form_prompt)
 
         # Prompt agent for response

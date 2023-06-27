@@ -27,23 +27,23 @@ def handle_conversation():
     st.session_state["is_conversing"] = True
 
     while st.session_state["is_conversing"]:
-        message = st.session_state["voice_ui"].get_response()
-        st.session_state["history"].append(message)
-
-        if message == "Penguin.":  # Code word to end
-            st.session_state["is_conversing"] = False
-            break
-
-        # Get response
+        # Play AI message
         response = st.session_state["agent"].get_response(
             st.session_state["history"],
             st.session_state["prompt"],
             st.session_state["form_prompt"],
         )
         st.session_state["history"].append(response)
-
-        # Speak response
         st.session_state["voice_ui"].speak(response)
+
+        # Get user message
+        message = st.session_state["voice_ui"].get_response()
+        st.session_state["history"].append(message)
+
+        print(f"App sees: {message[:7]}")
+        if message[:7].lower() == "penguin":  # Code word to end
+            st.session_state["is_conversing"] = False
+            break
 
 
 def main():
@@ -88,48 +88,53 @@ def main():
 
     st.write(st.session_state["form_prompt"])
 
-    chat, voice = st.tabs(["Chat", "Voice"])
+    # chat, voice = st.tabs(["Chat", "Voice"])
 
     # Text UI
-    with chat:
-        # Prompt user
-        st.text_input(
-            label="Response",
-            key="message",
-            label_visibility="collapsed",
-            placeholder="I've been thinking about...",
-            on_change=on_message_change,
-        )
+    # with chat:
+    #     # Prompt user
+    #     st.text_input(
+    #         label="Response",
+    #         key="message",
+    #         label_visibility="collapsed",
+    #         placeholder="I've been thinking about...",
+    #         on_change=on_message_change,
+    #     )
 
-        # Display chat
-        st.divider()
-        # Display messages in reverse (i.e. most recent is closest to text input)
-        if st.session_state["history"]:
-            num_messages = len(st.session_state["history"])
-            for i in range(-1, -1 * (num_messages + 1), -1):
-                msg = st.session_state["history"][i]
-                is_user = i % 2 == 0  # User speaks first
-                message(msg, is_user=is_user)
+    #     # Display chat
+    #     st.divider()
+    #     # Display messages in reverse (i.e. most recent is closest to text input)
+    #     if st.session_state["history"]:
+    #         num_messages = len(st.session_state["history"])
+    #         for i in range(-1, -1 * (num_messages + 1), -1):
+    #             msg = st.session_state["history"][i]
+    #             is_user = i % 2 == 0  # User speaks first
+    #             message(msg, is_user=is_user)
 
-    with voice:
-        st.write("To end your turn: pause, then say **'Armadillo.'**")
-        st.write(
-            "To end the conversation: pause, then say **'Penguin. [pause] Armadillo.'**"
-        )
+    # with voice:
 
-        if st.button("Start"):
-            handle_conversation()
+    st.divider()
+    st.write("To end your turn: end your message with the word **'over.'**")
+    st.write(
+        "To end the conversation: say, **'Penguin, over.'**, or hit the 'End' button"
+    )
 
-        if st.button("End"):
-            st.session_state["voice_ui"].stop_recognition()
+    if st.button("Start"):
+        st.session_state["history"] = []
+        handle_conversation()
 
-        # Display messages in reverse (i.e. most recent is closest to text input)
-        if st.session_state["history"]:
-            num_messages = len(st.session_state["history"])
-            for i in range(-1, -1 * (num_messages + 1), -1):
-                msg = st.session_state["history"][i]
-                is_user = i % 2 == 0  # User speaks first
-                message(msg, is_user=is_user)
+    if st.button("End"):
+        st.session_state["voice_ui"].stop_recognition()
+        st.session_state["is_conversing"] = False
+
+    # Display messages in reverse (i.e. most recent is closest to text input)
+    if st.session_state["history"]:
+        st.write("Chat transcript:")
+        num_messages = len(st.session_state["history"])
+        for i in range(-2, -1 * (num_messages + 1), -1):
+            msg = st.session_state["history"][i]
+            is_user = i % 2 != 0  # User speaks first
+            message(msg, is_user=is_user)
 
 
 if __name__ == "__main__":

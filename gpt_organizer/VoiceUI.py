@@ -27,7 +27,9 @@ class VoiceUI:
         self._recognizer.canceled.connect(self._stop_cb)
 
     def _handle_recognition(self, evt):
-        if evt.result.text == "Armadillo.":  # Code word to end recognition
+        print(evt.result.text)
+        if evt.result.text[-5:].lower() == "over.":  # Code word to end recognition
+            self._recognized_text.append(evt.result.text[:-5] + ".")
             self.stop_recognition()
             self._recognition_done.set()
             return

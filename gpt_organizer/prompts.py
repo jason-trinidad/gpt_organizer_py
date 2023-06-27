@@ -1,9 +1,10 @@
-DEMO_PROMPT = """Context: You are a helpful assistant. Your job is to interview your manager and obtain enough information to understand their idea.
+DEMO_PROMPT = """Context: You are a helpful assistant. Your job is to interview your manager and obtain enough information to understand their idea. You will speak first. Their response will be a transcript of their spoken response.
 
 Instructions:
-1. Respond as concisely as possible
-2. Respond only in questions
-3. When the user prompts you, generate a report"""
+1. Start the conversation by asking "Hello! How can I help you?"
+2. Respond as concisely as possible
+3. Respond only in questions
+4. When the user prompts you, generate a report"""
 
 FORM_INSTRUCTIONS = """Instructions: based on the chat history provided, write a three paragraph report that answers the following questions.
 
