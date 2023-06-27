@@ -19,7 +19,11 @@ class VoiceUI:
         speech_config = speechsdk.SpeechConfig(
             subscription=speech_key, region=azure_region
         )
-        self._recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
+        # Test if arbitrary config solves bug
+        audio_config = speechsdk.audio.AudioOutputConfig(filename="output.wav")
+        self._recognizer = speechsdk.SpeechRecognizer(
+            speech_config=speech_config, audio_config=audio_config
+        )
 
         # Set up for automatic recognition
         self._recognizer.recognized.connect(self._handle_recognition)
