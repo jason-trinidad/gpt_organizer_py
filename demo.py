@@ -23,6 +23,29 @@ def on_message_change():
     st.session_state["history"].append(response)
 
 
+def handle_conversation():
+    st.session_state["is_conversing"] = True
+
+    while st.session_state["is_conversing"]:
+        message = st.session_state["voice_ui"].get_response()
+        st.session_state["history"].append(message)
+
+        if message == "Penguin.":  # Code word to end
+            st.session_state["is_conversing"] = False
+            break
+
+        # Get response
+        response = st.session_state["agent"].get_response(
+            st.session_state["history"],
+            st.session_state["prompt"],
+            st.session_state["form_prompt"],
+        )
+        st.session_state["history"].append(response)
+
+        # Speak response
+        st.session_state["voice_ui"].speak(response)
+
+
 def main():
     # Initialize state
     if "prompt" not in st.session_state:
@@ -34,11 +57,11 @@ def main():
     if "message" not in st.session_state:
         st.session_state["message"] = ""
 
-    # if "is_recording" not in st.session_state:
-    #     st.session_state["is_recording"] = False
+    if "is_conversing" not in st.session_state:
+        st.session_state["is_conversing"] = False
 
     if "voice_ui" not in st.session_state:
-        st.session_state["voice_ui"] = None
+        st.session_state["voice_ui"] = VoiceUI()
 
     if "form_prompt" not in st.session_state:
         st.session_state["form_prompt"] = prompts.FORM_INSTRUCTIONS
@@ -81,21 +104,30 @@ def main():
         # Display chat
         st.divider()
         # Display messages in reverse (i.e. most recent is closest to text input)
-        num_messages = len(st.session_state["history"])
-        for i in range(-1, -1 * (num_messages + 1), -1):
-            msg = st.session_state["history"][i]
-            is_user = i % 2 == 0  # User speaks first
-            message(msg, is_user=is_user)
+        if st.session_state["history"]:
+            num_messages = len(st.session_state["history"])
+            for i in range(-1, -1 * (num_messages + 1), -1):
+                msg = st.session_state["history"][i]
+                is_user = i % 2 == 0  # User speaks first
+                message(msg, is_user=is_user)
 
     with voice:
-        placeholder = st.empty()
         if st.button("Start"):
-            st.session_state["voice_ui"] = VoiceUI(placeholder)
-            message = st.session_state["voice_ui"].get_response()
-            st.write(message)
+            st.write("To end your turn, say **'Armadillo.'**")
+            st.write("To end the conversation, say **'Penguin. Armadillo.'**")
+
+            handle_conversation()
 
         if st.button("End"):
             st.session_state["voice_ui"].stop_recognition()
+
+        # Display messages in reverse (i.e. most recent is closest to text input)
+        if st.session_state["history"]:
+            num_messages = len(st.session_state["history"])
+            for i in range(-1, -1 * (num_messages + 1), -1):
+                msg = st.session_state["history"][i]
+                is_user = i % 2 == 0  # User speaks first
+                message(msg, is_user=is_user)
 
 
 if __name__ == "__main__":
