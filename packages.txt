@@ -1,2 +1,2 @@
 libasound2
-libssl1.1
+libssl-dev
