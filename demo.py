@@ -131,9 +131,9 @@ def main():
     if st.session_state["history"]:
         st.write("Chat transcript:")
         num_messages = len(st.session_state["history"])
-        for i in range(-2, -1 * (num_messages + 1), -1):
+        for i in range(-1, -1 * (num_messages + 1), -1):
             msg = st.session_state["history"][i]
-            is_user = i % 2 != 0  # User speaks first
+            is_user = i % 2 == 0
             message(msg, is_user=is_user)
 
 
